@@ -90,6 +90,7 @@ async function mongoRun() {
                 } else {
                     req.body.active = true;
                     req.body.last_activated_at = new Date().toLocaleString();
+                    req.body.status = false;
                     company.insertOne(req.body).then(res2 => {
                         if (res2.acknowledged) {
                             company.findOne({ _id: res2.insertedId }).then(res3 => {
@@ -106,17 +107,21 @@ async function mongoRun() {
         app.post('/company/login', async function (req, res) {
             const response = await company.findOne(req.body);
             if (response) {
-                const newDate = new Date().toLocaleString();
-                const response2 = await company.updateOne({ _id: response._id }, { $set: { active: true, last_activated_at: newDate } });
-                response2.company = {
-                    ...response,
-                    active: true,
-                    last_activated_at: newDate
+                if (response.status) {
+                    const newDate = new Date().toLocaleString();
+                    const response2 = await company.updateOne({ _id: response._id }, { $set: { active: true, last_activated_at: newDate } });
+                    response2.company = {
+                        ...response,
+                        active: true,
+                        last_activated_at: newDate
+                    }
+                    res.send(response2);
+                }else{
+                    res.send("This Company Not Approved yet!")
                 }
-                res.send(response2);
             }
             else {
-                res.send('User not found or Wrong credentials')
+                res.send('Company not found or Wrong credentials')
             }
         });
         app.post('/company/logout', (req, res) => {
@@ -127,19 +132,19 @@ async function mongoRun() {
             })
         });
         // addign product
-        app.post('/company/add-product',(req,res)=>{
+        app.post('/company/add-product', (req, res) => {
             req.body.created_at = new Date().toLocaleString()
             req.body.updated_at = new Date().toLocaleString()
-            req.body.selling = true
-            product.insertOne(req.body).then(response=>{
+            req.body.selling = true;
+            product.insertOne(req.body).then(response => {
                 res.send(response);
-            }).catch(error=>{
+            }).catch(error => {
                 res.send(error.message)
             })
         })
         // getting products
-        app.get('/company/products',(req,res)=>{
-            product.find({}).toArray().then(response=>{
+        app.get('/company/products', (req, res) => {
+            product.find({}).toArray().then(response => {
                 res.send(response)
             }).catch(err => {
                 res.send(err.message)
