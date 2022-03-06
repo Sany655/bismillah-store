@@ -1,7 +1,8 @@
 const initialState = {
     admin:localStorage.getItem('admin') ? true : false,
     loading:false,
-    error:null
+    error:null,
+    companies:[],
 };
 
 const AdminReducers = (state = initialState, action) => {
@@ -30,6 +31,21 @@ const AdminReducers = (state = initialState, action) => {
             return {
                 ...state,
                 loading:!state.loading
+            }
+        case "ADMIN_LOADING":
+            return {
+                ...state,
+                loading:!state.loading
+            }
+        case "ADMIN_ERROR":
+            return {
+                ...state,
+                error: action.payload
+            }
+        case "GET_COMPANIES":
+            return {
+                ...state,
+                companies: action.payload
             }
         default: return state;
     }

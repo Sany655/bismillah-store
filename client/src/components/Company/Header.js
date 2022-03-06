@@ -7,7 +7,7 @@ function Header() {
     const company = useSelector(store => store.company).company;
     function logout() {
         axios.post('/company/logout', { _id: company._id }).then(res => {
-            if (res.data.ok) {
+            if (res.data.modifiedCount) {
                 dispatch({type:"COMPANY_LOGOUT"})
             }else{
                 dispatch({type:"COMPANY_ERROR",payload:res.data});

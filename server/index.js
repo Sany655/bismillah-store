@@ -3,14 +3,16 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
-
+const tinify = require("tinify");
+const multer = require("multer");
+const fs = require("fs");
 const app = express();
 
+app.use('/images',express.static(__dirname+'/images'));
 app.use(express.json());
 app.use(cors());
 
 const port = process.env.PORT || 5000;
-
 app.get('/', function (req, res) {
     res.send('hello world');
 })
@@ -116,7 +118,7 @@ async function mongoRun() {
                         last_activated_at: newDate
                     }
                     res.send(response2);
-                }else{
+                } else {
                     res.send("This Company Not Approved yet!")
                 }
             }
@@ -125,17 +127,40 @@ async function mongoRun() {
             }
         });
         app.post('/company/logout', (req, res) => {
-            company.findOneAndUpdate({ _id: req.body._id }, { $set: { active: false } }).then(res1 => {
+            company.updateOne({ _id: ObjectId(req.body._id) }, { $set: { active : false } }).then(res1 => {
                 res.send(res1)
             }).catch(error => {
                 console.log(error.message);
             })
         });
         // addign product
-        app.post('/company/add-product', (req, res) => {
-            req.body.created_at = new Date().toLocaleString()
-            req.body.updated_at = new Date().toLocaleString()
-            req.body.selling = true;
+        app.post('/company/add-product', multer({
+            storage: multer.diskStorage({
+                destination: (req, file, cb) => cb(null, "images/products/"),
+                filename: (req, file, cb) => cb(null, req.body.company_id + "-" + req.body.name.split(/[ /]+/).join("_") + "-" + file.originalname)
+            })
+        }).single("image"), async (req, res) => {
+            let i = 1;
+            const sizes = [];
+            const filepath = `images/products/` + req.file.filename;
+            function optimizingImage() {
+                tinify.key = 'MZxnW4qqq2GsJnMd4C0GZRHXK1gHCyXb';
+                tinify.fromFile(filepath).toFile(filepath).then(response => {
+                    const stats = fs.statSync(filepath);
+                    const sizeInKilo = parseInt(stats.size / 1024);
+                    sizes.push(sizeInKilo)
+                    console.log(`optimized ${i++} times - and size = ${sizeInKilo}kb`);
+                    if (sizes[sizes.length - 1] !== sizeInKilo || sizes.length < 2) {
+                        optimizingImage(filepath);
+                    } else {
+                        console.log(`optimization complete in ${sizeInKilo}`);
+                    }
+                }).catch(error => {
+                    console.log(error);
+                });
+            }
+            optimizingImage()
+            req.body.image = filepath;
             product.insertOne(req.body).then(response => {
                 res.send(response);
             }).catch(error => {
@@ -143,11 +168,29 @@ async function mongoRun() {
             })
         })
         // getting products
-        app.get('/company/products', (req, res) => {
-            product.find({}).toArray().then(response => {
+        app.get('/company/products/:company_id', (req, res) => {
+            product.find({company_id:req.params.company_id}).toArray().then(response => {
                 res.send(response)
             }).catch(err => {
                 res.send(err.message)
+            })
+        })
+
+
+        // admin pannel routes
+        app.get('/admin/companies',(req,res)=>{
+            company.find({}).toArray().then(response => {
+                res.send(response)
+            })
+        })
+        app.post('/admin/company/active',(req,res)=>{
+            company.updateOne({_id:ObjectId(req.body._id)},{$set:{status:true}}).then(response => {
+                res.send(response)
+            })
+        })
+        app.post('/admin/company/deactive',(req,res)=>{
+            company.updateOne({_id:ObjectId(req.body._id)},{$set:{status:false}}).then(response => {
+                res.send(response)
             })
         })
 

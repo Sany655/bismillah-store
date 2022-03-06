@@ -15,7 +15,7 @@ function CompanyRoutesContainer() {
                 <Route path='/' element={<CompanyRoute><Home /></CompanyRoute>} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/register' element={<Register />} />
-                <Route path='/products' element={<Products />} />
+                <Route path='/products' element={<CompanyRoute><Products /></CompanyRoute>} />
             </Routes>
         </React.Fragment>
     )

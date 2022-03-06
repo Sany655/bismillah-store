@@ -5,7 +5,8 @@ const initialState = {
     singleProduct:{},
     loading: false,
     error: null,
-    searchData:[]
+    searchData:[],
+    imageBaseUrl:"http://localhost:5000/"
 }
 export default function ProductReducers(state = initialState, action) {
     switch (action.type) {

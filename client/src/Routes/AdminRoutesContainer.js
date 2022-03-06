@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AdminLogin from '../components/Admin/Auth/AdminLogin'
 import Home from '../components/Admin/Home/Home'
 import Header from '../components/Admin/Common/Header'
+import Companies from '../components/Admin/Companies/Companies'
 
 function AdminRoutesContainer() {
     return (
@@ -11,6 +12,7 @@ function AdminRoutesContainer() {
             <Header />
             <Routes>
                 <Route path='' element={<AdminRoute><Home /></AdminRoute>} />
+                <Route path='company' element={<AdminRoute><Companies /></AdminRoute>} />
                 <Route path='login' element={<AdminLogin />} />
             </Routes>
         </React.Fragment>

@@ -20,7 +20,7 @@ function Header() {
                                         <NavLink className="nav-link active" aria-current="page" to="/admin">Home</NavLink>
                                     </li>
                                     <li className="nav-item">
-                                        <NavLink className="nav-link active" aria-current="page" to="products">Products</NavLink>
+                                        <NavLink className="nav-link active" aria-current="page" to="company">Company</NavLink>
                                     </li>
                                 </ul>
                                 <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
